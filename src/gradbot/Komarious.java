@@ -74,108 +74,108 @@ public class Komarious extends AdvancedRobot {
  
     }
  
-    public void onScannedRobot(ScannedRobotEvent e) {
-        Wave w;
-        int direction;
- 
-        double bulletPower;
-        if ((bulletPower = _oppEnergy - e.getEnergy()) <= 3
-            && bulletPower > 0) {
-            (w = _nextSurfWave).bulletSpeed = Rules.getBulletSpeed(bulletPower);
-            addCustomEvent(w);
-            _enemyWaves.addLast(w);
-        }
-        (_nextSurfWave = w = new Wave()).directAngle = _lastAbsBearingRadians;
-        w.waveGuessFactors = _surfStats[(int)(Math.min((_lastDistance+50)/200, 3))][(int)((Math.abs(_lastLatVel)+1)/2)];
-        w.orientation = direction = sign(_lastLatVel);
-        double enemyAbsoluteBearing;
-        w.sourceLocation = _enemyLocation = 
-            project((_myLocation = new Point2D.Double(getX(), getY())),
-                    _enemyAbsoluteBearing = enemyAbsoluteBearing = getHeadingRadians() + e.getBearingRadians(), _lastDistance = e.getDistance());
- 
-//        _oppEnergy = e.getEnergy(); // MC (done in gun normally)
- 
-        (w = new Wave()).sourceLocation = _myLocation;
-        addCustomEvent(w);
-        setTurnRadarRightRadians(Utils.normalRelativeAngle((w.directAngle = enemyAbsoluteBearing) - getRadarHeadingRadians()) * 2);
- 
- 
-        // WaveSurfing /////////////////////////////////////////////////////////
-        try {
-            _goAngle = (_surfWave = (Wave)(_enemyWaves.getFirst()))
-                .absoluteBearing(_myLocation) +
-                A_LITTLE_LESS_THAN_HALF_PI *
-                    (direction = (sign(checkDanger(-1) - checkDanger(1))));
-        } catch (Exception ex) { }
- 
-        // CREDIT: code by Iiley, optimized with idea from ChaseSan
-        // http://robowiki.net?BackAsFront
-        double angle;
-        setTurnRightRadians(Math.tan(angle = 
-            wallSmoothing(_myLocation, _goAngle, direction) - getHeadingRadians()));
-        setAhead(Math.cos(angle) * Double.POSITIVE_INFINITY);
- 
-        ////////////////////////////////////////////////////////
-        // CREDIT: Originally based on RaikoMicro's gun, by Jamougha
-        // http://robowiki.net?RaikoMicro
- 
-        /////
-        // TC
-/*
-        Wave w;
-        addCustomEvent(w = new Wave());
-        _enemyLocation =
-            project((w.sourceLocation = _myLocation = new Point2D.Double(getX(), getY())),
-            _enemyAbsoluteBearing, _lastDistance = e.getDistance());
-*/
-        /////
- 
-        // ------------- Fire control -------
-        double enemyLatVel;
-        _lastGunOrientation = w.orientation = sign(enemyLatVel = (e.getVelocity())*Math.sin(e.getHeadingRadians() - enemyAbsoluteBearing));
- 
-        int bestGF = Math.min(3, (int)(Math.pow(280*lastVChangeTime++/_lastDistance, .7)));
-//        int bestGF = Math.min(3, (int)(Math.sqrt(220D*lastVChangeTime++/_lastDistance))); // TC
-        int newVelocity;
-        if (enemyVelocity != (newVelocity = (int)(enemyLatVel = Math.abs(enemyLatVel)))) {
-            lastVChangeTime = 0;
-            bestGF = 4;
-            if (enemyVelocity > newVelocity) {
-                bestGF = 5;
-            }            
-        }
-        enemyVelocity = newVelocity;
- 
- 
-//        w.sourceLocation = _myLocation;
-//        w.directAngle = _enemyAbsoluteBearing;
-        w.waveGuessFactors = _gunStats[bestGF][(int)(LOG_BASE_E_TO_2_CONVERSION_CONSTANT * Math.log(enemyLatVel + 1.5))][gunWallDistance(0.18247367367) ? (gunWallDistance(0.36494734735) ? (gunWallDistance(0.63865785787) ? 3 : 2) : 1) : 0][gunWallDistance(-0.36494734735) ? 0 : 1][(int)limit(0, (_lastDistance-75)/200, 2)];
-//        w.waveGuessFactors = _gunStats[bestGF][(int)(LOG_BASE_E_TO_2_CONVERSION_CONSTANT * Math.log(enemyLatVel + 1.5))][gunWallDistance(0.24430198263) ? (gunWallDistance(0.48860396528) ? (gunWallDistance(0.85505693924) ? 3 : 2) : 1) : 0][gunWallDistance(-0.48860396528) ? 0 : 1][(int)limit(0, (_lastDistance-75)/200, 2)]; // TC
- 
-        bestGF = GF_ZERO;
- 
-        for (int gf = GF_ONE; gf >= 0 && (_oppEnergy = e.getEnergy()) > 0; gf--) // Jamougha: Saves one byte compared to going up, weird
-            if (w.waveGuessFactors[gf] > w.waveGuessFactors[bestGF])
-                bestGF = gf;
- 
-        double power = 2 - Math.max(0, (30 - getEnergy()) / 16);
-//      double power = 3; // TC
-        w.distance = -1.5 * (w.bulletSpeed = Rules.getBulletSpeed(power));
- 
-        setTurnGunRightRadians(Utils.normalRelativeAngle(enemyAbsoluteBearing - getGunHeadingRadians() + ((_lastGunOrientation*(Math.asin(8/w.bulletSpeed)/GF_ZERO))*(bestGF-GF_ZERO)) ));
-//        setTurnGunRightRadians(Utils.normalRelativeAngle(_enemyAbsoluteBearing - getGunHeadingRadians() + ((_lastGunOrientation*.035406)*(bestGF-GF_ZERO)) )); // TC
- 
-        if (Math.abs(getGunTurnRemaining()) < 3 && setFireBullet(power + (_ramCounter / (3*getRoundNum()+1))) != null) {
-//        if (Math.abs(getGunTurnRemaining()) < 3 && setFireBullet(3) != null) { // TC
-            w.weight = 4;
-        }
- 
-        ////////////////////////////////////////////////////////
- 
-        _lastLatVel = getVelocity()*Math.sin(e.getBearingRadians());
-        _goAngle = _lastAbsBearingRadians = enemyAbsoluteBearing + Math.PI;
-    }
- 
+//    public void onScannedRobot(ScannedRobotEvent e) {
+//        Wave w;
+//        int direction;
+// 
+//        double bulletPower;
+//        if ((bulletPower = _oppEnergy - e.getEnergy()) <= 3
+//            && bulletPower > 0) {
+//            (w = _nextSurfWave).bulletSpeed = Rules.getBulletSpeed(bulletPower);
+//            addCustomEvent(w);
+//            _enemyWaves.addLast(w);
+//        }
+//        (_nextSurfWave = w = new Wave()).directAngle = _lastAbsBearingRadians;
+//        w.waveGuessFactors = _surfStats[(int)(Math.min((_lastDistance+50)/200, 3))][(int)((Math.abs(_lastLatVel)+1)/2)];
+//        w.orientation = direction = sign(_lastLatVel);
+//        double enemyAbsoluteBearing;
+//        w.sourceLocation = _enemyLocation = 
+//            project((_myLocation = new Point2D.Double(getX(), getY())),
+//                    _enemyAbsoluteBearing = enemyAbsoluteBearing = getHeadingRadians() + e.getBearingRadians(), _lastDistance = e.getDistance());
+// 
+////        _oppEnergy = e.getEnergy(); // MC (done in gun normally)
+// 
+//        (w = new Wave()).sourceLocation = _myLocation;
+//        addCustomEvent(w);
+//        setTurnRadarRightRadians(Utils.normalRelativeAngle((w.directAngle = enemyAbsoluteBearing) - getRadarHeadingRadians()) * 2);
+// 
+// 
+//        // WaveSurfing /////////////////////////////////////////////////////////
+//        try {
+//            _goAngle = (_surfWave = (Wave)(_enemyWaves.getFirst()))
+//                .absoluteBearing(_myLocation) +
+//                A_LITTLE_LESS_THAN_HALF_PI *
+//                    (direction = (sign(checkDanger(-1) - checkDanger(1))));
+//        } catch (Exception ex) { }
+// 
+//        // CREDIT: code by Iiley, optimized with idea from ChaseSan
+//        // http://robowiki.net?BackAsFront
+//        double angle;
+//        setTurnRightRadians(Math.tan(angle = 
+//            wallSmoothing(_myLocation, _goAngle, direction) - getHeadingRadians()));
+//        setAhead(Math.cos(angle) * Double.POSITIVE_INFINITY);
+// 
+//        ////////////////////////////////////////////////////////
+//        // CREDIT: Originally based on RaikoMicro's gun, by Jamougha
+//        // http://robowiki.net?RaikoMicro
+// 
+//        /////
+//        // TC
+///*
+//        Wave w;
+//        addCustomEvent(w = new Wave());
+//        _enemyLocation =
+//            project((w.sourceLocation = _myLocation = new Point2D.Double(getX(), getY())),
+//            _enemyAbsoluteBearing, _lastDistance = e.getDistance());
+//*/
+//        /////
+// 
+//        // ------------- Fire control -------
+//        double enemyLatVel;
+//        _lastGunOrientation = w.orientation = sign(enemyLatVel = (e.getVelocity())*Math.sin(e.getHeadingRadians() - enemyAbsoluteBearing));
+// 
+//        int bestGF = Math.min(3, (int)(Math.pow(280*lastVChangeTime++/_lastDistance, .7)));
+////        int bestGF = Math.min(3, (int)(Math.sqrt(220D*lastVChangeTime++/_lastDistance))); // TC
+//        int newVelocity;
+//        if (enemyVelocity != (newVelocity = (int)(enemyLatVel = Math.abs(enemyLatVel)))) {
+//            lastVChangeTime = 0;
+//            bestGF = 4;
+//            if (enemyVelocity > newVelocity) {
+//                bestGF = 5;
+//            }            
+//        }
+//        enemyVelocity = newVelocity;
+// 
+// 
+////        w.sourceLocation = _myLocation;
+////        w.directAngle = _enemyAbsoluteBearing;
+//        w.waveGuessFactors = _gunStats[bestGF][(int)(LOG_BASE_E_TO_2_CONVERSION_CONSTANT * Math.log(enemyLatVel + 1.5))][gunWallDistance(0.18247367367) ? (gunWallDistance(0.36494734735) ? (gunWallDistance(0.63865785787) ? 3 : 2) : 1) : 0][gunWallDistance(-0.36494734735) ? 0 : 1][(int)limit(0, (_lastDistance-75)/200, 2)];
+////        w.waveGuessFactors = _gunStats[bestGF][(int)(LOG_BASE_E_TO_2_CONVERSION_CONSTANT * Math.log(enemyLatVel + 1.5))][gunWallDistance(0.24430198263) ? (gunWallDistance(0.48860396528) ? (gunWallDistance(0.85505693924) ? 3 : 2) : 1) : 0][gunWallDistance(-0.48860396528) ? 0 : 1][(int)limit(0, (_lastDistance-75)/200, 2)]; // TC
+// 
+//        bestGF = GF_ZERO;
+// 
+//        for (int gf = GF_ONE; gf >= 0 && (_oppEnergy = e.getEnergy()) > 0; gf--) // Jamougha: Saves one byte compared to going up, weird
+//            if (w.waveGuessFactors[gf] > w.waveGuessFactors[bestGF])
+//                bestGF = gf;
+// 
+//        double power = 2 - Math.max(0, (30 - getEnergy()) / 16);
+////      double power = 3; // TC
+//        w.distance = -1.5 * (w.bulletSpeed = Rules.getBulletSpeed(power));
+// 
+//        setTurnGunRightRadians(Utils.normalRelativeAngle(enemyAbsoluteBearing - getGunHeadingRadians() + ((_lastGunOrientation*(Math.asin(8/w.bulletSpeed)/GF_ZERO))*(bestGF-GF_ZERO)) ));
+////        setTurnGunRightRadians(Utils.normalRelativeAngle(_enemyAbsoluteBearing - getGunHeadingRadians() + ((_lastGunOrientation*.035406)*(bestGF-GF_ZERO)) )); // TC
+// 
+//        if (Math.abs(getGunTurnRemaining()) < 3 && setFireBullet(power + (_ramCounter / (3*getRoundNum()+1))) != null) {
+////        if (Math.abs(getGunTurnRemaining()) < 3 && setFireBullet(3) != null) { // TC
+//            w.weight = 4;
+//        }
+// 
+//        ////////////////////////////////////////////////////////
+// 
+//        _lastLatVel = getVelocity()*Math.sin(e.getBearingRadians());
+//        _goAngle = _lastAbsBearingRadians = enemyAbsoluteBearing + Math.PI;
+//    }
+// 
     public void onHitByBullet(HitByBulletEvent e) {
         _oppEnergy += e.getBullet().getPower() * 3;
         logAndRemoveWave(_myLocation);
